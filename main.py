@@ -69,6 +69,20 @@ class automata():
             return True
         else:
             return False
+    
+    def complement(self):
+        new_finish=""
+        for i in range(len(self.nodes)):
+            if i not in self.finish:
+                new_finish+=str(i)
+        self.finish=new_finish
+
+        for elem in self.nodes:
+            if elem.finish==True:
+                elem.finish=False
+            else:
+                elem.finish=True
+        return self
 
 def fill_automata(file:str, automata:automata):
     with open(file,'r') as file:
