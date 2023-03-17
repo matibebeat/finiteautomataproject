@@ -189,6 +189,19 @@ class automata():
 
         self.start="0"
         self.nodes=new_nodes
+    def recognise_word(self, word):
+        current_nodes = [self.start]  # liste des états courants
+        for letter in word:
+            next_nodes = []  # liste des états suivants
+            for node in current_nodes:
+                try:
+                    next_nodes.extend(self.nodes[int(node)].paths[letter])
+                except KeyError:
+                    pass
+            if not next_nodes:
+                return False  # aucun état suivant n'a été trouvé pour cette lettre
+            current_nodes = next_nodes
+        return any(node in self.finish for node in current_nodes)  # on renvoie True si au moins un état courant est un état final
 
 
     
@@ -237,7 +250,7 @@ print_automata(automata)
 
 
 def readword():
-    c = input("Enter the letter you want to read")
+    c = input("Enter the word you want to read")
     return c
 
 def informations(automate):
@@ -273,6 +286,9 @@ def automate_manager(file_name):
         i+=1
         choices.append("cop")
         print("{}-Complementarize it".format(i))
+        choices.append("rec")
+        i=i+1
+        print("{}-Test if a word is recognized by it".format(i))
         choice=int(input())
         if choices[choice-1]=="sta":
             automate.standardise()
@@ -282,6 +298,11 @@ def automate_manager(file_name):
             automate.determinize()
         if choices[choice-1]=="cop":
             automate.complement()
+        if choices[choice-1]=="rec":
+            if automate.recognise_word(readword()):
+                print("The word is recognized")
+            else:
+                print("The word is not recognized")
         
 
     
@@ -318,5 +339,5 @@ def main():
 
 
 
-
-main()
+if __name__ == "__main__":
+    main()
