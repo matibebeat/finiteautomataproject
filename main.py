@@ -15,7 +15,8 @@ class node():
 
     def add_path(self, label, target):
         try:
-            self.paths[label].append(target)
+            if target not in self.paths[label]:
+                self.paths[label].append(target)
         except:
             self.paths[label] = [target]
 
@@ -61,7 +62,7 @@ class automata():
         for elem in self.nodes:
             for paths,target in elem.paths.items():
                 for node in target:
-                    if node in initial_states:
+                    if str(node) in initial_states:
                         return False
         return True
 
@@ -106,7 +107,7 @@ class automata():
     def complement(self):
         new_finish=""
         for i in range(len(self.nodes)):
-            if i not in self.finish:
+            if str(i) not in self.finish:
                 new_finish+=str(i)
         self.finish=new_finish
 
@@ -116,6 +117,22 @@ class automata():
             else:
                 elem.finish=True
         return self
+
+    def standardise(self):
+        if self.is_standard():
+            return
+        new_nodes=node("{}".format(len(self.nodes)),True,False)
+        for elem in self.start:
+            for key,value in self.nodes[int(elem)].paths.items():
+                for elem in value:
+                    new_nodes.add_path(key,elem)
+                
+            self.nodes[int(elem)].start=False
+            if self.nodes[int(elem)].finish:
+                new_nodes.finish=True
+        self.nodes.append(new_nodes)
+        self.start="{}".format(len(self.nodes))
+            
     
     def determinize(self):
         if self.is_deterministic():
@@ -130,7 +147,7 @@ class automata():
         for elem in self.start:
             name+=elem
             for label in self.labels:
-                if self.nodes[int(elem)].paths[label][0] not in paths[label]:
+                if str(self.nodes[int(elem)].paths[label][0]) not in paths[label]:
                     paths[label]+="".join(self.nodes[int(elem)].paths[label])
             if self.nodes[int(elem)].finish:
                 finish=True
@@ -170,7 +187,7 @@ class automata():
                 state.paths[key]=[states.index("".join(sorted(value[0])))]
 
 
-
+        self.start="0"
         self.nodes=new_nodes
 
 
@@ -223,8 +240,83 @@ def readword():
     c = input("Enter the letter you want to read")
     return c
 
-automate1=automata("automate1.txt")
-automate1.determinize()
-print_automata(automate1)
+def informations(automate):
+    print_automata(automate)
+    print("════════════════════════")
+    print("Informations about your automata:")
+    print("Standard: {}".format(automate.is_standard()))
+    print("Complete: {}".format(automate.is_complete()))
+    print("Deterministic: {}".format(automate.is_deterministic()))
+    print("════════════════════════")
 
 
+def automate_manager(file_name):
+    automate=automata(file_name)
+    choice=0
+    choices=[]
+    while choice<=len(choices)+1:
+        choices=[]
+        informations(automate)
+        i=0
+        if not automate.is_standard():
+            i+=1
+            choices.append("sta")
+            print("{}-Standardise it".format(i))
+        if not automate.is_complete():
+            i+=1
+            choices.append("com")
+            print("{}-Complete it".format(i))
+        if not automate.is_deterministic():
+            i+=1
+            choices.append("det")
+            print("{}-Determinize it".format(i))
+        i+=1
+        choices.append("cop")
+        print("{}-Complementarize it".format(i))
+        choice=int(input())
+        if choices[choice-1]=="sta":
+            automate.standardise()
+        if choices[choice-1]=="com":
+            automate.complete()
+        if choices[choice-1]=="det":
+            automate.determinize()
+        if choices[choice-1]=="cop":
+            automate.complement()
+        
+
+    
+    
+
+def main():
+    choice=0
+    while(choice<1 or choice>4):
+        print("════════════════════════ ❀•°❀°•❀ ════════════════════════\n\n\n Welcome to Your Automata manager \n\n\n════════════════════════ ❀•°❀°•❀ ════════════════════════")   
+        print("     -If you want to import an automata tap 1")
+        print("     -If you want to use one of the default automata tap 2")
+        print("     -If you want to create a new automata tap 3")
+        print("     -If you want to exit tap 4")
+        choice=int(input())
+    if choice==4:
+        return
+    if choice==2:
+        automate_manager("automate1.txt")
+    if choice==1:
+        working=False
+        while(not working):
+            print("Enter the path to the file you want to import")
+            path=input()
+            print([path])
+            if not path.endswith(".txt"):
+                print("This is not a .txt file, please enter a valid filename")
+            else:
+                try: 
+                    with open(path,'r') as file:
+                        working=True
+                except:
+                    print("The path you entered is not valid")
+        automate_manager(path)
+
+
+
+
+main()
