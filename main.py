@@ -22,6 +22,8 @@ class automata():
 
     def is_standard(self):
         initial_states=self.start
+        if len(self.start)>1:
+            return False
         print(initial_states)
         for elem in self.nodes:
             for paths,target in elem.paths.items():
@@ -39,11 +41,22 @@ class automata():
         return True
     
     def is_deterministic(self):
+        if len(self.start)>1:
+            return False
         for elem in self.nodes:
             for paths,target in elem.paths.items():
                 if len(target)>1:
                     return False
         return True
+    
+    def complete(self):
+        last_node_number=len(self.nodes)
+        self.nodes.append(node(last_node_number,False,False))
+        for elem in self.nodes:
+            for label in self.labels:
+                if label not in elem.paths.keys():
+                    elem.paths[label]=['{}'.format(last_node_number)]
+        return self
 
 def fill_automata(file:str, automata:automata):
     with open(file,'r') as file:
@@ -93,4 +106,6 @@ def print_automata(automata:automata):
 automata=automata()
 fill_automata("automate1.txt",automata)
 print(automata.is_standard())
+print_automata(automata)
+automata.complete()
 print_automata(automata)
