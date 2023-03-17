@@ -33,6 +33,8 @@ class automata():
     def __init__(self,file:str) -> None:
         self.nodes=[]
         self.labels=[]
+        if file=='':
+            return
         with open(file,'r') as file:
             file_content=file.readlines()
         for i in range(len(file_content)):
@@ -204,9 +206,84 @@ class automata():
         return any(node in self.finish for node in current_nodes)  # on renvoie True si au moins un état courant est un état final
 
 
+    def recognise_words(self, words):
+        return [self.recognise_word(word) for word in words]
+    
+    def recognise_file(self, filename):
+        with open(filename, 'r') as file:
+            words = file.read().splitlines()
+        return self.recognise_words(words)
+    
+    def recognise_file_and_print(self, filename):
+        with open(filename, 'r') as file:
+            words = file.read().splitlines()
+        for word, result in zip(words, self.recognise_words(words)):
+            print(word, result)
+
+
+
+
+    def minimizied(self):
+        if not self.complete():
+            self.complete()
+        if not self.is_deterministic():
+            self.determinize()
+        initial_partition=[i for i in range (len(self.nodes))]
+        partitions=[[i for i in range (len(self.nodes)) if self.nodes[i].finish==False],[i for i in range (len(self.nodes)) if self.nodes[i].finish==True]]       
+        partition2=[]
+        partition3=[]
+        working=True
+        while (working==True):
+            for elem in partitions:
+                if len(elem)==1:
+                    new_partitions=[elem]
+                else:
+                    partitions_target={number : "" for number in elem}
+                    for number in elem:
+                        for label in self.labels:
+                            target=self.nodes[number].paths[label][0]
+                            for j in range(len(partitions)):
+                                if int(target) in partitions[j]:
+                                    partitions_target[number]+=str(j)
+                    new_partitions=group_by_value(partitions_target)
+                for elem in new_partitions:
+                    partition2.append(elem)
+            if partition2!=partitions:
+                partitions=partition2
+                partition2=[]
+            else:
+                working=False
+        i=0
+        new_nodes=[]
+        for elem in partitions:
+            node_to_add=node(i,False,False)
+            representative=elem[0]
+            for label in self.labels:
+                target=self.nodes[representative].paths[label][0]
+                for j in range(len(partitions)):
+                    if int(target) in partitions[j]:
+                        node_to_add.add_path(label,j)
+            if any(str(x) in self.start for x in elem):
+                node_to_add.start=True
+            if any(str(x) in self.finish for x in elem):
+                node_to_add.finish=True
+            new_nodes.append(node_to_add)
+            i+=1
+        self.nodes=new_nodes
+        self.start='0'
+        self.finish=[i for i in range(len(self.nodes)) if self.nodes[i].finish==True]
+    
+
     
         
-
+def group_by_value(d):
+    result = {}
+    for key, value in d.items():
+        if value not in result:
+            result[value] = [key]
+        else:
+            result[value].append(key)
+    return list(result.values())
 
     
 
@@ -286,6 +363,9 @@ def automate_manager(file_name):
         i+=1
         choices.append("cop")
         print("{}-Complementarize it".format(i))
+        i+=1
+        choices.append("min")
+        print("{}-Minimize it".format(i))
         choices.append("rec")
         i=i+1
         print("{}-Test if a word is recognized by it".format(i))
@@ -298,6 +378,8 @@ def automate_manager(file_name):
             automate.determinize()
         if choices[choice-1]=="cop":
             automate.complement()
+        if choices[choice-1]=="min":
+            automate.minimizied()
         if choices[choice-1]=="rec":
             if automate.recognise_word(readword()):
                 print("The word is recognized")
@@ -340,4 +422,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()

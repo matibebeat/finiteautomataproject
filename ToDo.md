@@ -12,11 +12,11 @@ display_complete_dererministic_automaton
 
 ## Done
 
-recognize_word (word, A)
-determinize
-display_automaton
-is_complete
-is_deterministic
-completion
-read_word
-complementary_automaton
+recognize_word (word, A),
+determinize,
+display_automaton,
+is_complete,
+is_deterministic,
+completion,
+read_word,
+complementary_automaton,
