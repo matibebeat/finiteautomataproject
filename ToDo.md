@@ -1,8 +1,8 @@
-##  ToDo
+# ToDo
 
 minimization
 
-##maybe on va pas les faires pcq inutiles
+## maybe on va pas les faires pcq inutiles
 
 display_minimal_automaton
 display_complete_dererministic_automaton
