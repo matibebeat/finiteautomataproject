@@ -58,7 +58,6 @@ class automata():
         initial_states=self.start
         if len(self.start)>1:
             return False
-        print(initial_states)
         for elem in self.nodes:
             for paths,target in elem.paths.items():
                 for node in target:
@@ -117,6 +116,66 @@ class automata():
             else:
                 elem.finish=True
         return self
+    
+    def determinize(self):
+        if self.is_deterministic():
+            return
+        if not self.is_complete():
+            self.complete()
+        new_nodes=[]
+        dones=[]
+        paths={label:"" for label in self.labels}
+        finish=False
+        name=""
+        for elem in self.start:
+            name+=elem
+            for label in self.labels:
+                if self.nodes[int(elem)].paths[label][0] not in paths[label]:
+                    paths[label]+="".join(self.nodes[int(elem)].paths[label])
+            if self.nodes[int(elem)].finish:
+                finish=True
+        start_node=node("".join(sorted(name)),True,finish)
+        to_compute=[]
+        for key,value in paths.items():
+            start_node.add_path(key,value)
+            if name!=value:
+                to_compute.append(value)
+        dones.append(name)
+        new_nodes.append(start_node)
+        while(len(to_compute)>1):
+            paths={label:"" for label in self.labels}
+            finish=False
+            name="".join(sorted(to_compute[0]))
+            for elem in name:
+                for label in self.labels:
+                    if "".join(self.nodes[int(elem)].paths[label]) not in paths[label]:
+                        paths[label]+="".join(self.nodes[int(elem)].paths[label])
+                if self.nodes[int(elem)].finish:
+                    finish=True
+            new_node=node(name,False,finish)
+            dones.append(name)
+            for key,value in paths.items():
+                new_node.add_path(key,"".join(sorted(value))) 
+            for key,value in paths.items():
+                if value not in to_compute and value not in dones:
+                    to_compute.append(value)
+            to_compute.pop(0)
+            new_nodes.append(new_node)
+        states=[]
+        for state in new_nodes:
+            states.append(state.number)
+        for state in new_nodes:
+            state.number=states.index(state.number)
+            for key,value in state.paths.items():
+                state.paths[key]=[states.index("".join(sorted(value[0])))]
+
+
+
+        self.nodes=new_nodes
+
+
+    
+        
 
 
     
@@ -165,10 +224,7 @@ def readword():
     return c
 
 automate1=automata("automate1.txt")
+automate1.determinize()
 print_automata(automate1)
-print(automate1.labels)
 
 
-"""
-string=readword()
-print(string)"""
