@@ -57,6 +57,18 @@ class automata():
                 if label not in elem.paths.keys():
                     elem.paths[label]=['{}'.format(last_node_number)]
         return self
+    
+    def is_recognizing(self,word):
+        current_node=self.start
+        for letter in word:
+            try:
+                current_node=self.nodes[int(current_node)].paths[letter][0]
+            except:
+                return False
+        if current_node in self.finish:
+            return True
+        else:
+            return False
 
 def fill_automata(file:str, automata:automata):
     with open(file,'r') as file:
@@ -102,10 +114,28 @@ def print_automata(automata:automata):
         print('\n')
 
 
-
+"""
 automata=automata()
 fill_automata("automate1.txt",automata)
 print(automata.is_standard())
 print_automata(automata)
 automata.complete()
 print_automata(automata)
+"""
+
+###########################################################
+#
+#
+#                   Usefull functions
+#
+#
+###########################################################
+
+
+def readword():
+    c = input("Enter the letter you want to read")
+    return c
+
+
+string=readword()
+print(string)
