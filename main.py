@@ -1,4 +1,10 @@
-
+###########################################################
+#
+#
+#                   Node Element
+#
+#
+###########################################################
 
 class node():
     def __init__(self, number,start, finish) -> None:
@@ -13,11 +19,39 @@ class node():
         except:
             self.paths[label] = [target]
 
+###########################################################
+#
+#
+#                   Automata Element
+#
+#
+###########################################################
+
 
 class automata():
-    def __init__(self) -> None:
-        self.labels=['a','b']
+    def __init__(self,file:str) -> None:
         self.nodes=[]
+        self.labels=[]
+        with open(file,'r') as file:
+            file_content=file.readlines()
+        for i in range(len(file_content)):
+            file_content[i]=file_content[i][:-1]
+        [number_of_initial_states,self.start]=file_content[2].split(" ")
+        [number_of_final_states,self.finish]=file_content[3].split(" ")
+        for i in range(int(file_content[1])):
+            if str(i) in self.finish:
+                is_terminal=True
+            else:
+                is_terminal=False
+            if str(i) in self.start:
+                is_initial=True
+            else:
+                is_initial=False
+            self.nodes.append(node(i,is_initial,is_terminal))
+        for elem in file_content[5:]:
+            if elem[1] not in self.labels:
+                self.labels.append(elem[1])
+            self.nodes[int(elem[0])].add_path(elem[1],elem[2])
 
 
     def is_standard(self):
@@ -84,27 +118,7 @@ class automata():
                 elem.finish=True
         return self
 
-def fill_automata(file:str, automata:automata):
-    with open(file,'r') as file:
-        file_content=file.readlines()
-    for i in range(len(file_content)):
-        file_content[i]=file_content[i][:-1]
-    [number_of_initial_states,initial_states]=file_content[2].split(" ")
-    [number_of_final_states,final_states]=file_content[3].split(" ")
-    automata.start=initial_states
-    automata.finish=final_states
-    for i in range(int(file_content[1])):
-        if str(i) in final_states:
-            is_terminal=True
-        else:
-            is_terminal=False
-        if str(i) in initial_states:
-            is_initial=True
-        else:
-            is_initial=False
-        automata.nodes.append(node(i,is_initial,is_terminal))
-    for elem in file_content[5:]:
-        automata.nodes[int(elem[0])].add_path( elem[1], elem[2])
+
     
 
 def print_automata(automata:automata):
@@ -150,6 +164,11 @@ def readword():
     c = input("Enter the letter you want to read")
     return c
 
+automate1=automata("automate1.txt")
+print_automata(automate1)
+print(automate1.labels)
 
+
+"""
 string=readword()
-print(string)
+print(string)"""
