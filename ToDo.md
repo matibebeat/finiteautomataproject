@@ -1,0 +1,10 @@
+is_deterministic
+is_complete
+completion
+display_complete_dererministic_automaton
+minimization
+display_minimal_automaton
+read_word
+recognize_word (word, A)
+complementary_automaton
+multipleloop 
