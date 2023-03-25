@@ -27,8 +27,8 @@ class node():
 #
 #
 ###########################################################
-
-
+characters = ['0','1','2','3','4','5','6','7','8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','&','@','!','#','$','%','^','*','(',')','_','+','-','=','{','}','[',']','|',':',';','"','<','>','?','/','~','`','.',',',' ']
+print(len(characters))
 class automata():
     def __init__(self,file:str) -> None:
         self.nodes=[]
@@ -41,20 +41,20 @@ class automata():
             file_content[i]=file_content[i][:-1]
         [number_of_initial_states,self.start]=file_content[2].split(" ")
         [number_of_final_states,self.finish]=file_content[3].split(" ")
-        for i in range(int(file_content[1])):
-            if str(i) in self.finish:
+        for elem in characters[:int(file_content[1])]:
+            if str(characters.index(elem)) in self.finish:
                 is_terminal=True
             else:
                 is_terminal=False
-            if str(i) in self.start:
+            if str(characters.index(elem)) in self.start:
                 is_initial=True
             else:
                 is_initial=False
-            self.nodes.append(node(i,is_initial,is_terminal))
+            self.nodes.append(node(elem,is_initial,is_terminal))
         for elem in file_content[5:]:
             if elem[1] not in self.labels:
                 self.labels.append(elem[1])
-            self.nodes[int(elem[0])].add_path(elem[1],elem[2])
+            self.nodes[characters.index(str(elem[0]))].add_path(elem[1],elem[2])
 
 
     def is_standard(self):
@@ -86,15 +86,16 @@ class automata():
         return True
     
     def complete(self):
-        last_node_number=len(self.nodes)
-        self.nodes.append(node(last_node_number,False,False))
+        last_node_number=characters[len(self.nodes)]
+        self.nodes.append(node(characters[characters.index(last_node_number)+1],False,False))
         for elem in self.nodes:
             for label in self.labels:
                 if label not in elem.paths.keys():
-                    elem.paths[label]=['{}'.format(last_node_number)]
+                    elem.paths[label]=['{}'.format(characters[characters.index(last_node_number)])]
         return self
     
     def is_recognizing(self,word):
+        """ca marche pas"""
         current_node=self.start
         for letter in word:
             try:
@@ -108,9 +109,9 @@ class automata():
     
     def complement(self):
         new_finish=""
-        for i in range(len(self.nodes)):
-            if str(i) not in self.finish:
-                new_finish+=str(i)
+        for elem in self.nodes:
+            if elem.number not in self.finish:
+                new_finish+=elem.number
         self.finish=new_finish
 
         for elem in self.nodes:
@@ -123,17 +124,19 @@ class automata():
     def standardise(self):
         if self.is_standard():
             return
-        new_nodes=node("{}".format(len(self.nodes)),True,False)
+        new_nodes=node("{}".format(characters[len(self.nodes)]),True,False)
         for elem in self.start:
-            for key,value in self.nodes[int(elem)].paths.items():
+            for key,value in self.nodes[int(characters.index(elem))].paths.items():
                 for elem in value:
                     new_nodes.add_path(key,elem)
                 
-            self.nodes[int(elem)].start=False
-            if self.nodes[int(elem)].finish:
+            self.nodes[int(characters.index(elem))].start=False
+            if self.nodes[int(characters.index(elem))].finish:
                 new_nodes.finish=True
+        for elem in self.nodes:
+            elem.start=False
         self.nodes.append(new_nodes)
-        self.start="{}".format(len(self.nodes))
+        self.start="{}".format(characters[len(self.nodes)])
             
     
     def determinize(self):
@@ -149,11 +152,12 @@ class automata():
         for elem in self.start:
             name+=elem
             for label in self.labels:
-                if str(self.nodes[int(elem)].paths[label][0]) not in paths[label]:
-                    paths[label]+="".join(self.nodes[int(elem)].paths[label])
-            if self.nodes[int(elem)].finish:
+                if str(self.nodes[int(characters.index(elem))].paths[label][0]) not in paths[label]:
+                    paths[label]+="".join(self.nodes[int(characters.index(elem))].paths[label])
+            if self.nodes[int(characters.index(elem))].finish:
                 finish=True
         start_node=node("".join(sorted(name)),True,finish)
+        """c'est la ligne qui pose probleme"""
         to_compute=[]
         for key,value in paths.items():
             start_node.add_path(key,value)
@@ -167,9 +171,9 @@ class automata():
             name="".join(sorted(to_compute[0]))
             for elem in name:
                 for label in self.labels:
-                    if "".join(self.nodes[int(elem)].paths[label]) not in paths[label]:
-                        paths[label]+="".join(self.nodes[int(elem)].paths[label])
-                if self.nodes[int(elem)].finish:
+                    if "".join(self.nodes[int(characters.index(elem))].paths[label]) not in paths[label]:
+                        paths[label]+="".join(self.nodes[int(characters.index(elem))].paths[label])
+                if self.nodes[int(characters.index(elem))].finish:
                     finish=True
             new_node=node(name,False,finish)
             dones.append(name)
@@ -189,10 +193,10 @@ class automata():
                 state.paths[key]=[states.index("".join(sorted(value[0])))]
 
 
-        self.start="0"
+        self.start="a"
         self.nodes=new_nodes
     def recognise_word(self, word):
-        current_nodes = [self.start]  # liste des états courants
+        current_nodes = [characters.index(self.start)]  # liste des états courants
         for letter in word:
             next_nodes = []  # liste des états suivants
             for node in current_nodes:
@@ -223,55 +227,52 @@ class automata():
 
 
 
-    def minimizied(self):
+    def minimized(self):
         if not self.complete():
             self.complete()
         if not self.is_deterministic():
             self.determinize()
-        initial_partition=[i for i in range (len(self.nodes))]
-        partitions=[[i for i in range (len(self.nodes)) if self.nodes[i].finish==False],[i for i in range (len(self.nodes)) if self.nodes[i].finish==True]]       
-        partition2=[]
-        partition3=[]
-        working=True
-        while (working==True):
+        partitions = [[i for i, node in enumerate(self.nodes) if not node.finish], [i for i, node in enumerate(self.nodes) if node.finish]]
+        partition2 = []
+        partition3 = []
+        working = True
+        while working:
             for elem in partitions:
-                if len(elem)==1:
-                    new_partitions=[elem]
+                if len(elem) == 1:
+                    new_partitions = [elem]
                 else:
-                    partitions_target={number : "" for number in elem}
+                    partitions_target = {number: "" for number in elem}
                     for number in elem:
                         for label in self.labels:
-                            target=self.nodes[number].paths[label][0]
+                            target = self.nodes[number].paths[label][0]
                             for j in range(len(partitions)):
                                 if int(target) in partitions[j]:
-                                    partitions_target[number]+=str(j)
-                    new_partitions=group_by_value(partitions_target)
+                                    partitions_target[number] += str(j)
+                    new_partitions = group_by_value(partitions_target)
                 for elem in new_partitions:
                     partition2.append(elem)
-            if partition2!=partitions:
-                partitions=partition2
-                partition2=[]
+            if partition2 != partitions:
+                partitions = partition2
+                partition2 = []
             else:
-                working=False
-        i=0
-        new_nodes=[]
-        for elem in partitions:
-            node_to_add=node(i,False,False)
-            representative=elem[0]
+                working = False
+        new_nodes = []
+        for i, elem in enumerate(partitions):
+            node_to_add = node(i, False, False)
+            representative = elem[0]
             for label in self.labels:
-                target=self.nodes[representative].paths[label][0]
-                for j in range(len(partitions)):
-                    if int(target) in partitions[j]:
-                        node_to_add.add_path(label,j)
+                target = self.nodes[representative].paths[label][0]
+                for j, partition in enumerate(partitions):
+                    if int(target) in partition:
+                        node_to_add.add_path(label, j)
             if any(str(x) in self.start for x in elem):
-                node_to_add.start=True
+                node_to_add.start = True
             if any(str(x) in self.finish for x in elem):
-                node_to_add.finish=True
+                node_to_add.finish = True
             new_nodes.append(node_to_add)
-            i+=1
-        self.nodes=new_nodes
-        self.start='0'
-        self.finish=[i for i in range(len(self.nodes)) if self.nodes[i].finish==True]
+        self.nodes = new_nodes
+        self.start = '0'
+        self.finish = [i for i, node in enumerate(self.nodes) if node.finish]
     
 
     
@@ -295,13 +296,13 @@ def print_automata(automata:automata):
     print('\n')
     for elem in automata.nodes:
         print(" ", end='')
-        print(elem.number,end='')
+        print(characters.index(elem.number),end='')
         print(" ", end='')
         for label in automata.labels:
             print(" ", end='')
             if label in elem.paths:
                 for target in elem.paths.get(label):
-                    print(target,end='')
+                    print(characters.index(target),end='')
             else:
                 print('*',end='')
             print(" ",end='')
@@ -379,7 +380,7 @@ def automate_manager(file_name):
         if choices[choice-1]=="cop":
             automate.complement()
         if choices[choice-1]=="min":
-            automate.minimizied()
+            automate.minimized()
         if choices[choice-1]=="rec":
             if automate.recognise_word(readword()):
                 print("The word is recognized")
