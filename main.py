@@ -89,7 +89,8 @@ class State():
         add a path to the state
         """
         try:
-            if target not in self.paths[label]:#if the state doesn't already have this label we add it 
+            # if the state doesn't already have this label we add it
+            if target not in self.paths[label]:
                 self.paths[label].append(target)
         except:
             self.paths[label] = [target]
@@ -125,7 +126,7 @@ class automata():
             -determinize: return the deterministic automata
             -complement: return the complement automata
             -minimize: return the minimized automata
-            
+
         """
         self.states = []
         self.labels = []
@@ -135,21 +136,24 @@ class automata():
             file_content = file.readlines()
         for i in range(len(file_content)):
             file_content[i] = file_content[i][:-1]
-        [number_of_initial_states, self.start] = file_content[2].split(" ") #we get the number of initial states and the name of the initial states
-        [number_of_final_states, self.finish] = file_content[3].split(" ") #we get the number of final states and the name of the final states
+        # we get the number of initial states and the name of the initial states
+        [number_of_initial_states, self.start] = file_content[2].split(" ")
+        # we get the number of final states and the name of the final states
+        [number_of_final_states, self.finish] = file_content[3].split(" ")
         for elem in characters[:int(file_content[1])]:
             if str(characters.index(elem)) in self.finish:
-                is_terminal = True #if the state is a final state we set is_terminal to True
+                is_terminal = True  # if the state is a final state we set is_terminal to True
             else:
-                is_terminal = False #if the state is not a final state we set is_terminal to False
+                is_terminal = False  # if the state is not a final state we set is_terminal to False
             if str(characters.index(elem)) in self.start:
-                is_initial = True #if the state is an initial state we set is_initial to True
+                is_initial = True  # if the state is an initial state we set is_initial to True
             else:
                 is_initial = False
             self.states.append(State(elem, is_initial, is_terminal))
         for elem in file_content[5:]:
             if elem[1] not in self.labels:
-                self.labels.append(elem[1]) #we add the label to the list of labels
+                # we add the label to the list of labels
+                self.labels.append(elem[1])
             self.states[characters.index(str(elem[0]))].add_path(
                 elem[1], elem[2])
 
@@ -158,15 +162,16 @@ class automata():
         return True if the automata is standard
         return False if the automata is not standard
         """
-        initial_states = self.start 
-        if len(self.start) > 1: #if there is more than one initial state the automata is not standard
+        initial_states = self.start
+        if len(self.start) > 1:  # if there is more than one initial state the automata is not standard
             return False
         for elem in self.states:
             for paths, target in elem.paths.items():
                 for state in target:
-                    if str(state) in initial_states: #if there is a path that goes to an initial state the automata is not standard
+                    # if there is a path that goes to an initial state the automata is not standard
+                    if str(state) in initial_states:
                         return False
-        return True #otherwise the automata is standard
+        return True  # otherwise the automata is standard
 
     def is_complete(self) -> bool:
         """
@@ -176,9 +181,9 @@ class automata():
         for elem in self.states:
             for label in self.labels:
                 if label not in elem.paths.keys():
-                    #if there is a state that doesn't have a path for each label the automata is not complete
+                    # if there is a state that doesn't have a path for each label the automata is not complete
                     return False
-        return True #otherwise the automata is complete
+        return True  # otherwise the automata is complete
 
     def is_deterministic(self) -> bool:
         """
@@ -186,27 +191,28 @@ class automata():
         return False if the automata is not deterministic
         """
         if len(self.start) > 1:
-            return False #if there is more than one initial state the automata is not deterministic
+            return False  # if there is more than one initial state the automata is not deterministic
         for elem in self.states:
             for paths, target in elem.paths.items():
                 if len(target) > 1:
-                    return False #if there is a path that goes to more than one state the automata is not deterministic
-        return True #otherwise the automata is deterministic
+                    return False  # if there is a path that goes to more than one state the automata is not deterministic
+        return True  # otherwise the automata is deterministic
 
     def complete(self):
         """
         complete the automata
         It will add a new sink state and add a path to it for each label that doesn't have a path
         """
-        last_node_number = characters[len(self.states)] #the name of the new state we will add
+        last_node_number = characters[len(
+            self.states)]  # the name of the new state we will add
         self.states.append(
-            State(characters[characters.index(last_node_number)+1], False, False)) #we add the new state to the automaton
-        for elem in self.states: 
-            for label in self.labels: 
-                if label not in elem.paths.keys(): #we look if each label of the alphabet is in the paths of the state
+            State(characters[characters.index(last_node_number)+1], False, False))  # we add the new state to the automaton
+        for elem in self.states:
+            for label in self.labels:
+                if label not in elem.paths.keys():  # we look if each label of the alphabet is in the paths of the state
                     elem.paths[label] = ['{}'.format(
-                        characters[characters.index(last_node_number)])] #if not we add a path to the sink state 
-        return self #we return the automata with the new state
+                        characters[characters.index(last_node_number)])]  # if not we add a path to the sink state
+        return self  # we return the automata with the new state
 
     def recognise_word(self, word: str) -> bool:
         """
@@ -244,104 +250,120 @@ class automata():
                             return True
             return False
 
+    def recognise_words(self, words: list) -> list:
+        """
+        return a list of booleans that correspond to the list of words
+        """
+        return [self.recognise_word(word) for word in words]
+
     def complement(self):
         """
         return the complement of the automata
         It will change the finish state to non final state and vice versa
         """
-        new_finish = "" #we create a new string that will contain the name of the new final states
+        new_finish = ""  # we create a new string that will contain the name of the new final states
         for elem in self.states:
-            if elem.number not in self.finish: #if the state is not a final state we add it to the string of the new final states
+            if elem.number not in self.finish:  # if the state is not a final state we add it to the string of the new final states
                 new_finish += elem.number
-        self.finish = new_finish #we change the string of the final states
+        self.finish = new_finish  # we change the string of the final states
 
-        for elem in self.states: #we invert for each state if it is final or not
+        for elem in self.states:  # we invert for each state if it is final or not
             if elem.finish == True:
-                elem.finish = False #true->false
+                elem.finish = False  # true->false
             else:
-                elem.finish = True  #false->true
+                elem.finish = True  # false->true
         return self
 
     def standardise(self):
         """
         standardise the automata
         """
-        if self.is_standard(): #if the automata is already standard we return it
+        if self.is_standard():  # if the automata is already standard we return it
             return
-        new_nodes = State("{}".format(characters[len(self.states)]), True, False) #we create a new state that will be the new initial state
+        # we create a new state that will be the new initial state
+        new_nodes = State("{}".format(
+            characters[len(self.states)]), True, False)
         for elem in self.start:
             for key, value in self.states[int(characters.index(elem))].paths.items():
                 for elem in value:
-                    new_nodes.add_path(key, elem) #we add the paths of the old initial state to the new initial state
+                    # we add the paths of the old initial state to the new initial state
+                    new_nodes.add_path(key, elem)
 
             self.states[int(characters.index(elem))].start = False
-            if self.states[int(characters.index(elem))].finish: #if the old initial state was final we make the new initial state final
+            # if the old initial state was final we make the new initial state final
+            if self.states[int(characters.index(elem))].finish:
                 new_nodes.finish = True
-        for elem in self.states: #we remove the paths that go to the old initial state
+        for elem in self.states:  # we remove the paths that go to the old initial state
             elem.start = False
-        self.states.append(new_nodes) #we add the new initial state to the automata
-        self.start = "{}".format(characters[len(self.states)]) #we change the string of the initial state
+        # we add the new initial state to the automata
+        self.states.append(new_nodes)
+        # we change the string of the initial state
+        self.start = "{}".format(characters[len(self.states)])
 
     def determinize(self):
         """
         determinize the automata
         """
-        if self.is_deterministic(): #if the automata is already deterministic we
+        if self.is_deterministic():  # if the automata is already deterministic we
             return
         if not self.is_complete():
-            self.complete() #if the automata is not complete we complete it
+            self.complete()  # if the automata is not complete we complete it
         new_nodes = []
         dones = []
-        paths = {label: "" for label in self.labels} #we create a dictionary that will contain the paths of the new states
+        # we create a dictionary that will contain the paths of the new states
+        paths = {label: "" for label in self.labels}
         finish = False
-        name = "" #we create a string that will contain the name of the new state
-        for elem in self.start: #we add the paths of the initial state to the dictionary
-            name += elem 
+        name = ""  # we create a string that will contain the name of the new state
+        for elem in self.start:  # we add the paths of the initial state to the dictionary
+            name += elem
             for label in self.labels:
                 if str(self.states[int(characters.index(elem))].paths[label][0]) not in paths[label]:
                     paths[label] += "".join(
                         self.states[int(characters.index(elem))].paths[label])
             if self.states[int(characters.index(elem))].finish:
                 finish = True
-        start_node = State("".join(sorted(name)), True, finish) #we create the new initial state
-        to_compute = [] #we create a list that will contain the states that we will have to compute
+        # we create the new initial state
+        start_node = State("".join(sorted(name)), True, finish)
+        to_compute = []  # we create a list that will contain the states that we will have to compute
         for key, value in paths.items():
             start_node.add_path(key, value)
             if name != value:
-                to_compute.append(value) #we add the paths of the initial state to the list
+                # we add the paths of the initial state to the list
+                to_compute.append(value)
         dones.append("".join(sorted(name)))
         new_nodes.append(start_node)
-        while(len(to_compute) > 0): #while there is still states to compute
+        while(len(to_compute) > 0):  # while there is still states to compute
             paths = {label: "" for label in self.labels}
-            finish = False #we reset the finish variable
+            finish = False  # we reset the finish variable
             name = "".join(sorted(to_compute[0]))
-            for elem in name: #we compute the paths of the new state
+            for elem in name:  # we compute the paths of the new state
                 for label in self.labels:
-                    if "".join(self.states[int(characters.index(elem))].paths[label]) not in paths[label]: #we add the paths of the old states to the new state
+                    # we add the paths of the old states to the new state
+                    if "".join(self.states[int(characters.index(elem))].paths[label]) not in paths[label]:
                         paths[label] += "".join(
-                            self.states[int(characters.index(elem))].paths[label]) #we add the paths of the old states to the new state
-                if self.states[int(characters.index(elem))].finish: #if one of the old state is final the new state is final
+                            self.states[int(characters.index(elem))].paths[label])  # we add the paths of the old states to the new state
+                # if one of the old state is final the new state is final
+                if self.states[int(characters.index(elem))].finish:
                     finish = True
             new_node = State(name, False, finish)
             dones.append(name)
-            for key, value in paths.items(): #we add the paths of the new state to the automata
+            for key, value in paths.items():  # we add the paths of the new state to the automata
                 new_node.add_path(key, "".join(sorted(value)))
             for key, value in paths.items():
-                if value not in to_compute and value not in dones: #if the path is not already in the list we add it
+                if value not in to_compute and value not in dones:  # if the path is not already in the list we add it
                     to_compute.append(value)
             to_compute.pop(0)
             new_nodes.append(new_node)  # we add the new state to the automata
         states = []
         for state in new_nodes:
             state.number = str(characters[dones.index(state.number)])
-        for state in new_nodes: #we change the paths of the new states
+        for state in new_nodes:  # we change the paths of the new states
             for key, value in state.paths.items():
-                state.paths[key] = [dones.index("".join(sorted(value[0])))] #we change the paths of the new states
+                # we change the paths of the new states
+                state.paths[key] = [dones.index("".join(sorted(value[0])))]
 
         self.start = "a"
         self.states = new_nodes
-
-    
 
     def minimized(self):
         """
@@ -350,14 +372,14 @@ class automata():
         if not self.complete():
             self.complete()
         if not self.is_deterministic():
-            self.determinize() # if the automata is not complete we complete it 
+            self.determinize()  # if the automata is not complete we complete it
         partitions = [[i for i, state in enumerate(self.states) if not state.finish], [
             i for i, state in enumerate(self.states) if state.finish]]  # we create the partitions
         partition2 = []
         partition3 = []
         working = True  # we create a variable that will be used to know if we have to continue the algorithm
         while working:  # while we have to continue the algorithm
-            for elem in partitions: # we create the new partitions
+            for elem in partitions:  # we create the new partitions
                 if len(elem) == 1:
                     new_partitions = [elem]
                 else:
@@ -375,25 +397,33 @@ class automata():
                 partitions = partition2
                 partition2 = []
             else:
-                working = False # if the new partitions are the same as the old ones we stop the algorithm
+                working = False  # if the new partitions are the same as the old ones we stop the algorithm
         new_nodes = []
-        for i, elem in enumerate(partitions): # we create the new automata
+        for i, elem in enumerate(partitions):  # we create the new automata
             node_to_add = State(i, False, False)
-            representative = elem[0] # we choose a representative of the partition
+            # we choose a representative of the partition
+            representative = elem[0]
             for label in self.labels:
-                target = self.states[representative].paths[label][0]    # we add the paths of the representative to the new state
-                for j, partition in enumerate(partitions): # we add the paths of the representative to the new state
+                # we add the paths of the representative to the new state
+                target = self.states[representative].paths[label][0]
+                # we add the paths of the representative to the new state
+                for j, partition in enumerate(partitions):
                     if int(target) in partition:
-                        node_to_add.add_path(label, j)  # we add the paths of the representative to the new state
-            if any(str(x) in self.start for x in elem): 
-                node_to_add.start = True   # if one of the old state is the start state the new state is the start state
+                        # we add the paths of the representative to the new state
+                        node_to_add.add_path(label, j)
+            if any(str(x) in self.start for x in elem):
+                # if one of the old state is the start state the new state is the start state
+                node_to_add.start = True
             for i in elem:
-                if self.states[i].finish:  # if one of the old state is a finish state the new state is a finish state
+                # if one of the old state is a finish state the new state is a finish state
+                if self.states[i].finish:
                     node_to_add.finish = True
             new_nodes.append(node_to_add)
-        self.states = new_nodes # we change the states of the automata
+        self.states = new_nodes  # we change the states of the automata
         self.start = '0'
-        self.finish = [i for i, state in enumerate(self.states) if state.finish]    # we change the start and finish states of the automata
+        # we change the start and finish states of the automata
+        self.finish = [i for i, state in enumerate(
+            self.states) if state.finish]
 
 ###########################################################
 #
@@ -433,9 +463,7 @@ def print_automata(automata: automata):
     print("|", end='')
     print("\n      ", end='')
 
-
     # print the line of dashes
-
 
     for key, value in size.items():
         for i in range(value):
@@ -443,7 +471,7 @@ def print_automata(automata: automata):
     print('')
     for elem in automata.states:
         if elem.finish:
-            print("<", end='')# if the state is a finish state, print a <
+            print("<", end='')  # if the state is a finish state, print a <
         else:
             print(" ", end='')
         if elem.start or elem.finish:
@@ -451,20 +479,22 @@ def print_automata(automata: automata):
         else:
             print(" ", end='')
         if elem.start:
-            print(">", end='') # if the state is a start state, print a >
+            print(">", end='')  # if the state is a start state, print a >
         else:
             print(" ", end='')
         print(" ", end='')
-        print(characters.index(str(elem.number)), end='') # print the name of the state
+        # print the name of the state
+        print(characters.index(str(elem.number)), end='')
         print(" ", end='')
         print("|", end='')
-        for label in automata.labels: # print the target of the state for each label
+        for label in automata.labels:  # print the target of the state for each label
             s = 0
             print(" ", end='')
             if label in elem.paths:
                 for target in elem.paths.get(label):
                     print(characters.index(str(target)), end='')
-                    print(" ", end='') # Print a space between each target to make the table more readable
+                    # Print a space between each target to make the table more readable
+                    print(" ", end='')
                     s += 1
 
             else:
@@ -475,7 +505,7 @@ def print_automata(automata: automata):
                 print(" "*2, end='')
             print("|", end='')
         print("\n      ", end='')
-        for key, value in size.items(): # print the line of dashes
+        for key, value in size.items():  # print the line of dashes
             for i in range(value):
                 print("____", end='')
         print('')
@@ -509,36 +539,38 @@ def automate_manager(file_name: str):
     automate = automata(file_name)
     choice = 0
     choices = []
-    while choice <= len(choices)+1: # while the user doesn't choose to exit
+    while choice <= len(choices)+1:  # while the user doesn't choose to exit
         choices = []
-        informations(automate) # print the automata and its informations
+        informations(automate)  # print the automata and its informations
         i = 0
-        if not automate.is_standard(): # if the automata is not standard, add the option to standardise it to the menu
+        if not automate.is_standard():  # if the automata is not standard, add the option to standardise it to the menu
             i += 1
             choices.append("sta")
             print("{}-Standardise it".format(i))
-        if not automate.is_complete(): # if the automata is not complete, add the option to complete it to the menu
+        if not automate.is_complete():  # if the automata is not complete, add the option to complete it to the menu
             i += 1
             choices.append("com")
             print("{}-Complete it".format(i))
-        if not automate.is_deterministic(): # if the automata is not deterministic, add the option to determinize it to the menu
+        if not automate.is_deterministic():  # if the automata is not deterministic, add the option to determinize it to the menu
             i += 1
             choices.append("det")
             print("{}-Determinize it".format(i))
         i += 1
-        choices.append("cop") # add the option to complementarize it to the menu
+        # add the option to complementarize it to the menu
+        choices.append("cop")
         print("{}-Complementarize it".format(i))
         i += 1
-        choices.append("min") # add the option to minimize it to the menu
+        choices.append("min")  # add the option to minimize it to the menu
         print("{}-Minimize it".format(i))
-        choices.append("rec") # add the option to test if a word is recognized by it to the menu
+        # add the option to test if a word is recognized by it to the menu
+        choices.append("rec")
         i = i+1
         print("{}-Test if a word is recognized by it".format(i))
         choice = int(input())
 
         # apply the choice
 
-        if choices[choice-1] == "sta": 
+        if choices[choice-1] == "sta":
             automate.standardise()
         if choices[choice-1] == "com":
             automate.complete()
@@ -549,11 +581,15 @@ def automate_manager(file_name: str):
         if choices[choice-1] == "min":
             automate.minimized()
         if choices[choice-1] == "rec":
-            x=readword()
+            x = readword()
             if automate.recognise_word(x):
-                print("The word is recognized")
+                print("-----------------------------------")
+                print("\n\n The word: {}is recognized \n\n".format(x))
+                print("-----------------------------------")
             else:
-                print("\n\n The word {} is not recognized\n\n".format(x))
+                print("-----------------------------------")
+                print("\n\n The word: {} is not recognized\n\n".format(x))
+                print("-----------------------------------")
 
 
 def main():
@@ -570,7 +606,7 @@ def main():
     -If you want to exit tap 4
     """
     choice = 0
-    while(choice < 1 or choice > 4): # while the user doesn't choose a valid option or exit
+    while(choice < 1 or choice > 4):  # while the user doesn't choose a valid option or exit
         print("════════════════════════ ❀•°❀°•❀ ════════════════════════\n\n\n Welcome to Your Automata manager \n\n\n════════════════════════ ❀•°❀°•❀ ════════════════════════")
         print("     -If you want to import an automata tap 1")
         print("     -If you want to use one of the default automata tap 2")
@@ -581,15 +617,17 @@ def main():
         return
     if choice == 2:
         print("════════════════════════════════════════════════════════════")
-        x = input("enter the number of the automata you want to use (1-42)") # ask the user to choose an automata from the default automata list
+        # ask the user to choose an automata from the default automata list
+        x = input("enter the number of the automata you want to use (1-42)")
         automate_manager("{}.txt".format(x))
-    if choice == 1: # ask the user to enter the path to the file he wants to import, if he want to import an automaton that was not in the default automata list
+    if choice == 1:  # ask the user to enter the path to the file he wants to import, if he want to import an automaton that was not in the default automata list
         working = False
         while(not working):
             print("Enter the path to the file you want to import")
             path = input()
             print([path])
-            if not path.endswith(".txt"): # if the file is not a .txt file, ask the user to enter a valid filename
+            # if the file is not a .txt file, ask the user to enter a valid filename
+            if not path.endswith(".txt"):
                 print("This is not a .txt file, please enter a valid filename")
             else:
                 try:    # try to open the file, if it fails, ask the user to enter a valid path
@@ -597,14 +635,14 @@ def main():
                         working = True
                 except:
                     print("The path you entered is not valid")
-        automate_manager(path) # if the file is valid, open it
+        automate_manager(path)  # if the file is valid, open it
 
 ###########################################################
 #
 #
 #                   Save functions
 #                   (save the automata in a file)
-#                   Was used to create all the traces       
+#                   Was used to create all the traces
 #
 ###########################################################
 
