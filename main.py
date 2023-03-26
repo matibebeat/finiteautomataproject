@@ -380,9 +380,9 @@ def main():
 
 def create_automaton(source_file):
     automate=automata(source_file)
-    automate.determinize()
+    automate.complement()
     # write to destination file
-    with open(source_file[:-4]+"\\"+source_file[:-4]+"_determinized.txt", 'w') as f:
+    with open(source_file[:-4]+"\\"+source_file[:-4]+"_complement.txt", 'w') as f:
         # write number of symbols
         f.write(str(len(automate.labels)) + '\n')
         # write number of nodes

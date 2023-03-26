@@ -1,0 +1,34 @@
+4
+21
+1 0
+20 0123456789abcdefghij
+4
+0&1
+0&a
+1&2
+1&6
+2&3
+2&5
+3b4
+4&3
+5&8
+6a7
+7&8
+8c9
+9ck
+a&b
+a&e
+b&c
+b&d
+c&d
+cad
+d&c
+d&g
+ebf
+f&g
+g&h
+g&j
+hci
+i&h
+i&j
+j&k
