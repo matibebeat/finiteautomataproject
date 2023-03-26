@@ -268,23 +268,57 @@ def group_by_value(d):
     return list(result.values())
 
 def print_automata(automata:automata):
-    print("    ", end='')
+    print("      ", end='')
+    size={}
     for elem in automata.labels:
+        size[elem]=0
+    for node in automata.nodes:
+        for key,value in node.paths.items():
+            if len(value)>size[key]:
+                size[key]=len(value)
+    for elem in automata.labels:
+        print("| ", end='')
         print(elem, end='')
-        print(" ", end='')
+        print(" "*2*(size[elem]), end='')
+    print('\n')
+    print("      ", end='')
+    for key,value in size.items():
+        for i in range(value):
+            print("---", end='')
     print('\n')
     for elem in automata.nodes:
+        if elem.finish:
+            print("<", end='')
+        else:
+            print(" ", end='')
+        if elem.start or elem.finish:
+            print("-", end='')
+        else:
+            print(" ", end='')
+        if elem.start:
+            print(">", end='')
+        else:
+            print(" ", end='')
         print(" ", end='')
         print(characters.index(elem.number),end='')
         print(" ", end='')
+        print("|", end='')
         for label in automata.labels:
+            s=0
             print(" ", end='')
             if label in elem.paths:
                 for target in elem.paths.get(label):
-                    print(characters.index(target),end='')
+                    print(characters.index(str(target)),end='')
+                    print(" ",end='')
+                    s+=1
+                
             else:
-                print('*',end='')
-            print(" ",end='')
+                print(' ',end='')
+                print(" ",end='')
+                s+=1
+            for i in range(size[label]-s):
+                print(" "*2,end='')
+            print("|", end='')
         print('\n')
 
 def readword():
@@ -359,7 +393,9 @@ def main():
     if choice==4:
         return
     if choice==2:
-        automate_manager("automate1.txt")
+        print("════════════════════════════════════════════════════════════")
+        x=input("enter the number of the automata you want to use (1-42)")
+        automate_manager("{}.txt".format(x))
     if choice==1:
         working=False
         while(not working):
@@ -409,8 +445,8 @@ def create_automaton(source_file):
 
 
 if __name__ == "__main__":
+    """
     for i in range(1, 35):
         create_automaton("{}.txt".format(i))
     """
     main()
-"""
