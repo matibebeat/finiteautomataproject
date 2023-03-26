@@ -1,11 +1,3 @@
-###########################################################
-#
-#
-#                   Node Element
-#
-#
-###########################################################
-
 class node():
     def __init__(self, number,start, finish) -> None:
         self.number = number
@@ -20,13 +12,6 @@ class node():
         except:
             self.paths[label] = [target]
 
-###########################################################
-#
-#
-#                   Automata Element
-#
-#
-###########################################################
 characters = ['0','1','2','3','4','5','6','7','8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','&','@','!','#','$','%','^','*','(',')','_','+','-','=','{','}','[',']','|',':',';','"','<','>','?','/','~','`','.',',',' ']
 print(len(characters))
 class automata():
@@ -157,15 +142,14 @@ class automata():
             if self.nodes[int(characters.index(elem))].finish:
                 finish=True
         start_node=node("".join(sorted(name)),True,finish)
-        """c'est la ligne qui pose probleme"""
         to_compute=[]
         for key,value in paths.items():
             start_node.add_path(key,value)
             if name!=value:
                 to_compute.append(value)
-        dones.append(name)
+        dones.append("".join(sorted(name)))
         new_nodes.append(start_node)
-        while(len(to_compute)>1):
+        while(len(to_compute)>0):
             paths={label:"" for label in self.labels}
             finish=False
             name="".join(sorted(to_compute[0]))
@@ -186,11 +170,11 @@ class automata():
             new_nodes.append(new_node)
         states=[]
         for state in new_nodes:
-            states.append(state.number)
+            state.number=str(characters[dones.index(state.number)])
         for state in new_nodes:
-            state.number=states.index(state.number)
             for key,value in state.paths.items():
-                state.paths[key]=[states.index("".join(sorted(value[0])))]
+                print(state.paths)
+                state.paths[key]=[dones.index("".join(sorted(value[0])))]
 
 
         self.start="a"
@@ -273,9 +257,6 @@ class automata():
         self.nodes = new_nodes
         self.start = '0'
         self.finish = [i for i, node in enumerate(self.nodes) if node.finish]
-    
-
-    
         
 def group_by_value(d):
     result = {}
@@ -285,8 +266,6 @@ def group_by_value(d):
         else:
             result[value].append(key)
     return list(result.values())
-
-    
 
 def print_automata(automata:automata):
     print("    ", end='')
@@ -307,25 +286,6 @@ def print_automata(automata:automata):
                 print('*',end='')
             print(" ",end='')
         print('\n')
-
-
-"""
-automata=automata()
-fill_automata("automate1.txt",automata)
-print(automata.is_standard())
-print_automata(automata)
-automata.complete()
-print_automata(automata)
-"""
-
-###########################################################
-#
-#
-#                   Usefull functions
-#
-#
-###########################################################
-
 
 def readword():
     c = input("Enter the word you want to read")
@@ -387,10 +347,6 @@ def automate_manager(file_name):
             else:
                 print("The word is not recognized")
         
-
-    
-    
-
 def main():
     choice=0
     while(choice<1 or choice>4):
@@ -422,6 +378,39 @@ def main():
 
 
 
-if __name__ == "__main__":
+def create_automaton(source_file):
+    automate=automata(source_file)
+    automate.determinize()
+    # write to destination file
+    with open(source_file[:-4]+"\\"+source_file[:-4]+"_determinized.txt", 'w') as f:
+        # write number of symbols
+        f.write(str(len(automate.labels)) + '\n')
+        # write number of nodes
+        f.write(str(len(automate.nodes)) + '\n')
+        # write initial states
+        f.write(str(len(automate.start)) + ' ' + automate.start + '\n')
+        # write final states
+        f.write(str(len(automate.finish)) + ' ' + automate.finish + '\n')
+        # write transitions
+        f.write(str(4) + '\n')
+        for elem in automate.nodes:
+            for label in automate.labels:
+                if label in elem.paths:
+                    for target in elem.paths.get(label):
+                        f.write(str(elem.number)+ label + str(target) + '\n')
 
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    for i in range(1, 35):
+        create_automaton("{}.txt".format(i))
+    """
     main()
+"""
